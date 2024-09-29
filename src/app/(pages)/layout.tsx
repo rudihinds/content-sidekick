@@ -7,10 +7,9 @@ interface AuthLayoutProps {
 
 export default function PagesLayout({ children }: AuthLayoutProps) {
   return (
-    <div className="min-h-screen">
+    <div className="flex flex-col h-screen overflow-hidden">
       <SiteHeader />
-      {children}
-      <SiteFooter />
+      <div className="flex-1 overflow-hidden">{children}</div>
     </div>
   );
 }

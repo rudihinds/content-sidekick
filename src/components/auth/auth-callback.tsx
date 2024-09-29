@@ -10,30 +10,32 @@ export default function AuthCallback() {
 
   const searchParams = useSearchParams();
   const origin = searchParams.get("origin");
-  trpc.authCallback.useQuery(undefined, {
-    onSuccess: ({ success }) => {
-      if (success) {
-        router.push(origin ? `${origin}` : "/");
-      }
-    },
-    onError: (err) => {
-      toast.error("AuthCallBack: Something went wrong!");
-      if (err.data?.code === "UNAUTHORIZED") {
-        router.push("/signin");
-      }
-    },
-    retry: false
-  });
+  
+  // Comment out or remove the trpc query for now
+  // trpc.authCallback.useQuery(undefined, {
+  //   onSuccess: ({ success }) => {
+  //     if (success) {
+  //       router.push(origin ? `${origin}` : "/");
+  //     }
+  //   },
+  //   onError: (err) => {
+  //     toast.error("AuthCallBack: Something went wrong!");
+  //     if (err.data?.code === "UNAUTHORIZED") {
+  //       router.push("/signin");
+  //     }
+  //   },
+  //   retry: false
+  // });
 
   return (
-    <div className="flex flex-col items-center gap-6  justify-center">
+    <div className="flex flex-col items-center justify-center gap-6">
       <Icons.configure className="h-9 w-9" aria-hidden="true" />
       <div className="text-center">
-        <h3 className="font-semibold text-xl">
+        <h3 className="text-xl font-semibold">
           You are almost done.
           <br /> Your account is being configured.
         </h3>
-        <p className="text-muted-foreground mt-2">
+        <p className="mt-2 text-muted-foreground">
           {" "}
           You will be redirected shortly.
         </p>
