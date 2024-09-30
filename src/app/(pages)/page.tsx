@@ -109,6 +109,8 @@ const talkingPointsData = [
   },
 ];
 
+const pages = ['Dashboard', 'Related', 'Ideas', 'Script', 'Review'];
+
 export default function Dashboard() {
   const searchParams = useSearchParams();
   const [activeTab, setActiveTab] = useState("related");
@@ -160,6 +162,16 @@ export default function Dashboard() {
   const [showRightArrow, setShowRightArrow] = useState(false);
 
   const { videoTopics, addVideoTopic, removeVideoTopic } = useVideoTopics();
+
+  const [currentPageIndex, setCurrentPageIndex] = useState(1); // Start at 'Related'
+
+  const handleBack = () => {
+    setCurrentPageIndex((prevIndex) => Math.max(0, prevIndex - 1));
+  };
+
+  const handleNext = () => {
+    setCurrentPageIndex((prevIndex) => Math.min(pages.length - 1, prevIndex + 1));
+  };
 
   useEffect(() => {
     const checkScroll = () => {
@@ -248,8 +260,8 @@ export default function Dashboard() {
   };
 
   const renderContent = () => {
-    switch (activeTab) {
-      case "search":
+    switch (pages[currentPageIndex]) {
+      case 'Dashboard':
         return (
           <SearchSection
             searchTerm={searchTerm}
@@ -257,7 +269,7 @@ export default function Dashboard() {
             handleNewSearch={handleNewSearch}
           />
         );
-      case "related":
+      case 'Related':
         return (
           <RelatedSection
             selectedTimeRange={selectedTimeRange}
@@ -268,9 +280,11 @@ export default function Dashboard() {
             handleSelectSearch={handleSelectSearch}
             handleGetContentIdeas={handleGetContentIdeas}
             trendingData={trendingData}
+            onBack={handleBack}
+            onNext={handleNext}
           />
         );
-      case "ideas":
+      case 'Ideas':
         return (
           <IdeasSection
             mainSearch={mainSearch}
@@ -282,9 +296,11 @@ export default function Dashboard() {
             removeVideoTopic={removeVideoTopic}
             selectedContentType={selectedContentType}
             setSelectedContentType={setSelectedContentType}
+            onBack={handleBack}
+            onNext={handleNext}
           />
         );
-      case "create":
+      case 'Script':
         return (
           <CreateSection
             selectedContentType={selectedContentType}
@@ -294,16 +310,19 @@ export default function Dashboard() {
             generatedIdeas={generatedIdeas}
           />
         );
-      case "settings":
-        return <div>Settings content goes here</div>;
+      case 'Review':
+        return <div>Review content goes here</div>;
       default:
-        return <div>Select a tab</div>;
+        return <div>Select a page</div>;
     }
   };
 
   return (
     <div className="flex h-full overflow-hidden">
-      <Sidebar activeTab={activeTab} setActiveTab={setActiveTab} />
+      <Sidebar 
+        currentPageIndex={currentPageIndex}
+        setCurrentPageIndex={setCurrentPageIndex}
+      />
       <main className="flex-1 p-8 overflow-hidden">
         <div className="h-full overflow-auto">{renderContent()}</div>
       </main>

@@ -1,9 +1,22 @@
-import React, { useRef, useState } from 'react';
+import React, { useRef, useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { ChevronDown, ChevronLeft, ChevronRight } from "lucide-react";
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
+import {
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+} from "recharts";
 import { TrendData } from "@/types";
 
 interface RelatedSectionProps {
@@ -15,6 +28,8 @@ interface RelatedSectionProps {
   handleSelectSearch: (term: string) => void;
   handleGetContentIdeas: (term: string) => void;
   trendingData: TrendData[];
+  onBack: () => void;
+  onNext: () => void;
 }
 
 export function RelatedSection({
@@ -25,7 +40,9 @@ export function RelatedSection({
   selectedSearch,
   handleSelectSearch,
   handleGetContentIdeas,
-  trendingData
+  trendingData,
+  onBack,
+  onNext,
 }: RelatedSectionProps) {
   const talkingPointsScrollRef = useRef<HTMLDivElement>(null);
   const [showLeftArrow, setShowLeftArrow] = useState(false);
@@ -42,15 +59,23 @@ export function RelatedSection({
   };
 
   const getSelectedTrendData = () => {
-    return trendingData.find((data) => data.term === selectedSearch) || trendingData[0];
+    return (
+      trendingData.find((data) => data.term === selectedSearch) ||
+      trendingData[0]
+    );
   };
 
   return (
-    <div className="space-y-8">
-      <Card className="overflow-hidden">
+    <div className="flex flex-col h-full space-y-4">
+      <Card className="flex-shrink-0 overflow-hidden">
         <CardContent className="p-6">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-2xl font-bold">Related YouTube Searches</h2>
+            <h2 className="text-2xl font-bold">
+              Youtube Searches Related to{' '}
+              <span className="italic font-extrabold underline decoration-orange-500 decoration-4">
+                {selectedSearch}
+              </span>
+            </h2>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="outline" className="ml-auto">
@@ -59,7 +84,10 @@ export function RelatedSection({
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
                 {timeRanges.map((range) => (
-                  <DropdownMenuItem key={range} onSelect={() => handleTimeRangeChange(range)}>
+                  <DropdownMenuItem
+                    key={range}
+                    onSelect={() => handleTimeRangeChange(range)}
+                  >
                     {range}
                   </DropdownMenuItem>
                 ))}
@@ -92,7 +120,8 @@ export function RelatedSection({
               className="px-6 -mx-6 overflow-x-auto scrollbar-hide"
               onScroll={() => {
                 if (talkingPointsScrollRef.current) {
-                  const { scrollLeft, scrollWidth, clientWidth } = talkingPointsScrollRef.current;
+                  const { scrollLeft, scrollWidth, clientWidth } =
+                    talkingPointsScrollRef.current;
                   setShowLeftArrow(scrollLeft > 0);
                   setShowRightArrow(scrollLeft < scrollWidth - clientWidth - 1);
                 }
@@ -102,19 +131,32 @@ export function RelatedSection({
                 {[0, 1].map((rowIndex) => (
                   <div key={rowIndex} className="flex space-x-4">
                     {relatedSearches
-                      .slice(rowIndex * Math.ceil(relatedSearches.length / 2), (rowIndex + 1) * Math.ceil(relatedSearches.length / 2))
+                      .slice(
+                        rowIndex * Math.ceil(relatedSearches.length / 2),
+                        (rowIndex + 1) * Math.ceil(relatedSearches.length / 2)
+                      )
                       .map((search, index) => (
                         <div
                           key={index}
                           className={`w-64 p-4 bg-secondary rounded-lg cursor-pointer transition-all ${
-                            selectedSearch === search ? "ring-2 ring-primary" : ""
+                            selectedSearch === search
+                              ? "ring-2 ring-primary"
+                              : ""
                           }`}
-                          onClick={() => handleSelectSearch(search === selectedSearch ? "" : search)}
+                          onClick={() =>
+                            handleSelectSearch(
+                              search === selectedSearch ? "" : search
+                            )
+                          }
                         >
                           <div className="mb-2 font-medium">{search}</div>
                           <div className="grid grid-cols-2 gap-2">
-                            <div className="text-sm text-muted-foreground">Searches: 10K</div>
-                            <div className="text-sm text-muted-foreground">Views: 500K</div>
+                            <div className="text-sm text-muted-foreground">
+                              Searches: 10K
+                            </div>
+                            <div className="text-sm text-muted-foreground">
+                              Views: 500K
+                            </div>
                           </div>
                         </div>
                       ))}
@@ -127,7 +169,11 @@ export function RelatedSection({
                 className="transition-opacity"
                 onClick={() => handleGetContentIdeas(selectedSearch)}
                 disabled={!selectedSearch}
-                title={!selectedSearch ? "Select a search term to get ideas" : "Get ideas for selected search"}
+                title={
+                  !selectedSearch
+                    ? "Select a search term to get ideas"
+                    : "Get ideas for selected search"
+                }
               >
                 Get Ideas
               </Button>
@@ -135,22 +181,52 @@ export function RelatedSection({
           </div>
         </CardContent>
       </Card>
-      <Card>
-        <CardContent className="p-6">
-          <h2 className="mb-4 text-2xl font-bold">Trending Data for {selectedSearch || "Selected Term"}</h2>
-          <div className="h-[400px]">
+
+      <Card className="flex-grow overflow-hidden">
+        <CardContent className="flex flex-col h-full p-6">
+          <h2 className="mb-4 text-2xl font-bold">
+            Trending Data for{' '}
+            <span className="italic font-extrabold underline decoration-orange-500 decoration-4">
+              {selectedSearch || "Selected Term"}
+            </span>
+          </h2>
+          <div className="flex-grow">
             <ResponsiveContainer width="100%" height="100%">
-              <LineChart data={getSelectedTrendData().trend.map((value, index) => ({ name: `Day ${index + 1}`, value }))}>
+              <LineChart
+                data={getSelectedTrendData().trend.map((value, index) => ({
+                  name: `Day ${index + 1}`,
+                  value,
+                }))}
+              >
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis dataKey="name" />
                 <YAxis />
                 <Tooltip />
-                <Line type="monotone" dataKey="value" stroke="#8884d8" strokeWidth={2} />
+                <Line
+                  type="monotone"
+                  dataKey="value"
+                  stroke="#8884d8"
+                  strokeWidth={2}
+                />
               </LineChart>
             </ResponsiveContainer>
           </div>
         </CardContent>
       </Card>
+
+      {/* Navigation buttons */}
+      <div className="flex justify-end mt-auto space-x-2">
+        <Button
+          onClick={onBack}
+          variant="outline"
+          className="px-4 py-2 text-sm"
+        >
+          Back
+        </Button>
+        <Button onClick={onNext} className="px-4 py-2 text-sm">
+          Next
+        </Button>
+      </div>
     </div>
   );
 }
