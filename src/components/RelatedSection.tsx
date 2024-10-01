@@ -30,6 +30,7 @@ interface RelatedSectionProps {
   trendingData: TrendData[];
   onBack: () => void;
   onNext: () => void;
+  mainSearch: string; // Make sure this is included in the interface
 }
 
 export function RelatedSection({
@@ -43,6 +44,7 @@ export function RelatedSection({
   trendingData,
   onBack,
   onNext,
+  mainSearch, // Add this to the destructured props
 }: RelatedSectionProps) {
   const talkingPointsScrollRef = useRef<HTMLDivElement>(null);
   const [showLeftArrow, setShowLeftArrow] = useState(false);
@@ -73,7 +75,7 @@ export function RelatedSection({
             <h2 className="text-2xl font-bold">
               Youtube Searches Related to{' '}
               <span className="italic font-extrabold underline decoration-orange-500 decoration-4">
-                {selectedSearch}
+                {mainSearch}
               </span>
             </h2>
             <DropdownMenu>
@@ -164,20 +166,6 @@ export function RelatedSection({
                 ))}
               </div>
             </div>
-            <div className="flex justify-end mt-4">
-              <Button
-                className="transition-opacity"
-                onClick={() => handleGetContentIdeas(selectedSearch)}
-                disabled={!selectedSearch}
-                title={
-                  !selectedSearch
-                    ? "Select a search term to get ideas"
-                    : "Get ideas for selected search"
-                }
-              >
-                Get Ideas
-              </Button>
-            </div>
           </div>
         </CardContent>
       </Card>
@@ -223,8 +211,16 @@ export function RelatedSection({
         >
           Back
         </Button>
-        <Button onClick={onNext} className="px-4 py-2 text-sm">
-          Next
+        <Button 
+          onClick={() => {
+            handleGetContentIdeas(selectedSearch);
+            onNext();
+          }}
+          className="px-4 py-2 text-sm"
+          disabled={!selectedSearch}
+          title={!selectedSearch ? "Select a search term to generate ideas" : "Generate content ideas for selected search"}
+        >
+          Generate Talking Points
         </Button>
       </div>
     </div>

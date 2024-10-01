@@ -12,7 +12,7 @@ export function VideoTopics({ videoTopics, onRemoveTopic }: VideoTopicsProps) {
   return (
     <Card>
       <CardContent className="p-4">
-        <h2 className="mb-2 text-lg font-bold">Video Topics (maximum 8)</h2>
+        <h2 className="mb-2 text-lg font-bold">Content Topics</h2>
         <div className="grid grid-cols-2 gap-x-4">
           {[0, 1].map((colIndex) => (
             <div key={colIndex} className="space-y-2">

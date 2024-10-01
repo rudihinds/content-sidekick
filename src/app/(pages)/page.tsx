@@ -9,6 +9,7 @@ import { RelatedSection } from "@/components/RelatedSection";
 import { CreateSection } from "@/components/CreateSection";
 import { IdeasSection } from "@/components/IdeasSection";
 import { Sidebar } from "@/components/Sidebar";
+import { faker } from '@faker-js/faker';
 
 const timeRanges = [
   "Past hour",
@@ -109,7 +110,7 @@ const talkingPointsData = [
   },
 ];
 
-const pages = ['Dashboard', 'Related', 'Ideas', 'Script', 'Review'];
+const pages = ['Dashboard', 'Related Searches', 'Talking Points', 'Content Ideas', 'Review'];
 
 export default function Dashboard() {
   const searchParams = useSearchParams();
@@ -269,7 +270,7 @@ export default function Dashboard() {
             handleNewSearch={handleNewSearch}
           />
         );
-      case 'Related':
+      case 'Related Searches':
         return (
           <RelatedSection
             selectedTimeRange={selectedTimeRange}
@@ -282,9 +283,10 @@ export default function Dashboard() {
             trendingData={trendingData}
             onBack={handleBack}
             onNext={handleNext}
+            mainSearch={mainSearch} // Make sure this line is present
           />
         );
-      case 'Ideas':
+      case 'Talking Points':
         return (
           <IdeasSection
             mainSearch={mainSearch}
@@ -300,14 +302,14 @@ export default function Dashboard() {
             onNext={handleNext}
           />
         );
-      case 'Script':
+      case 'Content Ideas':
         return (
           <CreateSection
             selectedContentType={selectedContentType}
             mainSearch={mainSearch}
             relatedSearch={relatedSearch}
-            handleGenerateIdeas={handleGenerateIdeas}
-            generatedIdeas={generatedIdeas}
+            videoTopics={videoTopics}
+            talkingPoints={talkingPoints}
           />
         );
       case 'Review':

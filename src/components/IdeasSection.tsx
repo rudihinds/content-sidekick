@@ -42,11 +42,11 @@ export function IdeasSection({
       <Card className="mb-3">
         <CardContent className="p-3">
           <h2 className="mb-2 text-lg font-bold">
-            What People Are Saying About{' '}
+            What People Are Saying About{" "}
             <span className="italic font-extrabold underline decoration-orange-500 decoration-4">
               {mainSearch}
-            </span>{' '}
-            and{' '}
+            </span>{" "}
+            and{" "}
             <span className="italic font-extrabold underline decoration-orange-500 decoration-4">
               {relatedSearch}
             </span>
@@ -104,9 +104,7 @@ export function IdeasSection({
                   </h3>
                   <div className="flex items-center justify-between mb-1">
                     <span className="text-xs font-medium">Heat Score:</span>
-                    <Badge
-                      className="text-xs text-orange-500"
-                    >
+                    <Badge className="text-xs text-orange-500">
                       <Thermometer className="w-3 h-3 mr-1" />
                       {point.heatScore}/10
                     </Badge>
@@ -133,7 +131,8 @@ export function IdeasSection({
         />
         <Card>
           <CardContent className="p-3">
-            <h2 className="mb-2 text-sm font-bold">Choose a content type</h2>
+            <h2 className="mb-2 text-lg font-bold">Content Format</h2>
+
             <div className="grid grid-cols-2 gap-2">
               {["Tutorials", "Vlogs", "Podcasts", "Shorts"].map((type) => (
                 <Button
@@ -159,7 +158,7 @@ export function IdeasSection({
           Back
         </Button>
         <Button onClick={onNext} className="px-4 py-2 text-sm">
-          Next
+          Generate Content Ideas
         </Button>
       </div>
     </div>

@@ -2,7 +2,7 @@ import React from 'react';
 import { Button } from "@/components/ui/button";
 import { Search, LayoutDashboard, Lightbulb, FileText, Eye, Settings } from "lucide-react";
 
-const pages = ['Dashboard', 'Related', 'Ideas', 'Script', 'Review'];
+const pages = ['Dashboard', 'Related Searches', 'Talking Points', 'Content Ideas', 'Review'];
 
 interface SidebarProps {
   currentPageIndex: number;
@@ -13,9 +13,9 @@ export function Sidebar({ currentPageIndex, setCurrentPageIndex }: SidebarProps)
   const getIcon = (page: string) => {
     switch (page) {
       case 'Dashboard': return <Search className="w-4 h-4 mr-2" />;
-      case 'Related': return <LayoutDashboard className="w-4 h-4 mr-2" />;
-      case 'Ideas': return <Lightbulb className="w-4 h-4 mr-2" />;
-      case 'Script': return <FileText className="w-4 h-4 mr-2" />;
+      case 'Related Searches': return <LayoutDashboard className="w-4 h-4 mr-2" />;
+      case 'Talking Points': return <Lightbulb className="w-4 h-4 mr-2" />;
+      case 'Content Ideas': return <FileText className="w-4 h-4 mr-2" />;
       case 'Review': return <Eye className="w-4 h-4 mr-2" />;
       default: return <Settings className="w-4 h-4 mr-2" />;
     }
