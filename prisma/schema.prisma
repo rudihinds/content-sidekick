@@ -11,11 +11,95 @@ datasource db {
 }
 
 model User {
-  id        String   @id @unique
-  fullname  String?
-  username  String?
-  email     String   @unique
-  image     String?
-  createdAt DateTime @default(now()) @map(name: "created_at")
-  updatedAt DateTime @default(now()) @map(name: "updated_at")
+  id                String         @id @unique
+  fullname          String?
+  username          String?        @unique
+  email             String         @unique
+  image             String?
+  stripeCustomerId  String?        @unique
+  subscriptionStatus String?
+  createdAt         DateTime       @default(now()) @map(name: "created_at")
+  updatedAt         DateTime       @updatedAt @map(name: "updated_at")
+  keywords          Keyword[]
+  contentBlocks     ContentBlock[]
+}
+
+model Keyword {
+  id                  Int                  @id @default(autoincrement())
+  content             String
+  userId              String
+  user                User                 @relation(fields: [userId], references: [id])
+  googleTrendsData    GoogleTrendsData?
+  redditTalkingPoints RedditTalkingPoint[]
+  contentIdeas        ContentIdea[]
+  createdAt           DateTime             @default(now())
+  updatedAt           DateTime             @updatedAt
+}
+
+model GoogleTrendsData {
+  id        Int      @id @default(autoincrement())
+  keywordId Int      @unique
+  keyword   Keyword  @relation(fields: [keywordId], references: [id])
+  trendData Json
+  fetchedAt DateTime @default(now())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model RedditTalkingPoint {
+  id             Int        @id @default(autoincrement())
+  keywordId      Int
+  keyword        Keyword    @relation(fields: [keywordId], references: [id])
+  content        String     @db.Text
+  contentSummary String?    @db.Text
+  contentHash    String?
+  contentUrl     String?
+  url            String
+  aiSummary      AISummary?
+  createdAt      DateTime   @default(now())
+  updatedAt      DateTime   @updatedAt
+}
+
+model AISummary {
+  id                 Int                @id @default(autoincrement())
+  redditTalkingPointId Int               @unique
+  redditTalkingPoint RedditTalkingPoint @relation(fields: [redditTalkingPointId], references: [id])
+  summary            String             @db.Text
+  createdAt          DateTime           @default(now())
+  updatedAt          DateTime           @updatedAt
+}
+
+model ContentIdea {
+  id           Int               @id @default(autoincrement())
+  keywordId    Int
+  keyword      Keyword           @relation(fields: [keywordId], references: [id])
+  content      String            @db.Text
+  aiGenerated  Boolean           @default(false)
+  createdAt    DateTime          @default(now())
+  updatedAt    DateTime          @updatedAt
+  contentBlocks ContentBlockIdea[]
+}
+
+model ContentBlock {
+  id          Int                 @id @default(autoincrement())
+  userId      String
+  user        User                @relation(fields: [userId], references: [id])
+  title       String
+  description String?
+  ideas       ContentBlockIdea[]
+  createdAt   DateTime            @default(now())
+  updatedAt   DateTime            @updatedAt
+}
+
+model ContentBlockIdea {
+  id             Int          @id @default(autoincrement())
+  contentBlockId Int
+  contentBlock   ContentBlock @relation(fields: [contentBlockId], references: [id])
+  contentIdeaId  Int
+  contentIdea    ContentIdea  @relation(fields: [contentIdeaId], references: [id])
+  order          Int
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+
+  @@unique([contentBlockId, contentIdeaId])
 }
