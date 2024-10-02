@@ -27,6 +27,7 @@ interface CreateSectionProps {
   relatedSearch: string;
   videoTopics: string[];
   talkingPoints: { id: string; content: string; summary: string }[];
+  selectedContentType: string; // Add this line
   onBack: () => void;
   onSave: () => void;
 }
@@ -82,6 +83,7 @@ export function CreateSection({
   relatedSearch,
   videoTopics,
   talkingPoints,
+  selectedContentType, // Add this line
   onBack,
   onSave,
 }: CreateSectionProps) {

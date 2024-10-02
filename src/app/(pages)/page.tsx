@@ -10,6 +10,8 @@ import { CreateSection } from "@/components/CreateSection";
 import { IdeasSection } from "@/components/IdeasSection";
 import { Sidebar } from "@/components/Sidebar";
 import { faker } from '@faker-js/faker';
+import { auth } from '@clerk/nextjs';
+import { redirect } from 'next/navigation';
 
 const timeRanges = [
   "Past hour",

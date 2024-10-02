@@ -1,3 +1,4 @@
+import React from "react";
 import { LogOutButtons } from "@/components/auth/logout-button";
 import { Icons } from "@/components/icons";
 import { buttonVariants } from "@/components/ui/button";
@@ -19,14 +20,12 @@ export default async function Signout() {
           "absolute left-4 top-4 md:left-8 md:top-8"
         )}
       >
-        <>
-          <ChevronLeft className="mr-2 h-4 w-4" />
-          Back
-        </>
+        <ChevronLeft className="w-4 h-4 mr-2" />
+        Back
       </Link>
       <div className="mx-auto flex w-full flex-col justify-center space-y-6 sm:w-[350px]">
         <div className="flex flex-col space-y-2 text-center">
-          <Icons.logo className="mx-auto h-6 w-6" />
+          <Icons.logo className="w-6 h-6 mx-auto" />
           <h1 className="text-2xl font-semibold tracking-tight">
             Are you sure?
           </h1>

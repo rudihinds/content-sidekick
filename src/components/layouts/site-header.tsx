@@ -1,21 +1,23 @@
 import React from "react";
-import { UserCircle } from "lucide-react";
+import Link from "next/link";
 import Image from "next/image";
+import { UserButton } from "@clerk/nextjs";
 
-const SiteHeader: React.FC = () => {
+export default function SiteHeader() {
   return (
-    <header className="bg-white border-b border-gray-200 shadow-sm">
-      <div className="container flex items-center justify-between h-16 px-4 mx-auto">
-        <div className="flex items-center">
-          {/* Replace with your actual logo */}
-          <Image src="/logo.png" alt="Logo" width={40} height={40} />
-        </div>
-        <div className="flex items-center">
-          <UserCircle className="w-8 h-8 text-gray-600 cursor-pointer" />
-        </div>
+    <header className="sticky top-0 z-40 w-full border-b bg-background">
+      <div className="container flex h-16 items-center justify-between">
+        <Link href="/" className="flex items-center">
+          <Image
+            src="/brand/logo.png"
+            alt="Content Sidekick"
+            width={150}
+            height={40}
+            priority
+          />
+        </Link>
+        <UserButton afterSignOutUrl="/" />
       </div>
     </header>
-  );
-};
-
-export default SiteHeader;
+  )
+}
