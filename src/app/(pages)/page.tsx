@@ -312,6 +312,8 @@ export default function Dashboard() {
             relatedSearch={relatedSearch}
             videoTopics={videoTopics}
             talkingPoints={talkingPoints}
+            onBack={handleBack}  // Add this line
+            onSave={() => {}}    // Add this line or implement a save function
           />
         );
       case 'Review':
