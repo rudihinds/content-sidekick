@@ -1,4 +1,7 @@
+'use client';
+
 import React, { useState } from 'react';
+import { useForm, SubmitHandler } from 'react-hook-form';
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -64,17 +67,29 @@ const categoryOptions = {
   "Health": GoogleTrendsMainCategory.HEALTH,
 };
 
+interface FormInputs {
+  searchTerm: string;
+}
+
 export function SearchSection({ searchTerm, setSearchTerm, handleNewSearch }: SearchSectionProps) {
   const [timeRange, setTimeRange] = useState<GoogleTrendsTimeRange>(GoogleTrendsTimeRange.PAST_30_DAYS);
   const [geo, setGeo] = useState<GoogleTrendsGeo>(GoogleTrendsGeo.GLOBAL);
   const [searchType, setSearchType] = useState<GoogleTrendsSearchType>(GoogleTrendsSearchType.YOUTUBE_SEARCH);
   const [category, setCategory] = useState<GoogleTrendsMainCategory>(GoogleTrendsMainCategory.ALL_CATEGORIES);
 
-  const handleSearch = () => {
+  const { register, handleSubmit } = useForm<FormInputs>({
+    defaultValues: {
+      searchTerm: searchTerm
+    }
+  });
+
+  const onSubmit: SubmitHandler<FormInputs> = (data) => {
+    console.log("Search term:", data.searchTerm);
+    setSearchTerm(data.searchTerm);
     const params: GoogleTrendsQueryParams = {
       timeRange,
-      geo: geo === "GLOBAL" ? GoogleTrendsGeo.GLOBAL : geo,
-      searchType: searchType === "WEB_SEARCH" ? GoogleTrendsSearchType.WEB_SEARCH : searchType,
+      geo: geo === GoogleTrendsGeo.GLOBAL ? GoogleTrendsGeo.GLOBAL : geo,
+      searchType: searchType === GoogleTrendsSearchType.WEB_SEARCH ? GoogleTrendsSearchType.WEB_SEARCH : searchType,
       category
     };
     handleNewSearch(params);
@@ -84,12 +99,11 @@ export function SearchSection({ searchTerm, setSearchTerm, handleNewSearch }: Se
     <Card>
       <CardContent className="p-6">
         <h2 className="mb-4 text-2xl font-bold">New Search</h2>
-        <div className="space-y-4">
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           <div className="flex space-x-4">
             <Input
+              {...register("searchTerm", { required: true })}
               type="text"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
               placeholder="Enter new search term"
               className="flex-grow"
             />
@@ -144,8 +158,8 @@ export function SearchSection({ searchTerm, setSearchTerm, handleNewSearch }: Se
               </SelectContent>
             </Select>
           </div>
-          <Button onClick={handleSearch} className="w-full">Search Data</Button>
-        </div>
+          <Button type="submit" className="w-full">Search Data</Button>
+        </form>
       </CardContent>
     </Card>
   );
