@@ -99,6 +99,18 @@ export enum GoogleTrendsMainCategory {
   HOBBIES_AND_LEISURE = 65,
   HOME_AND_GARDEN = 11,
   INTERNET_AND_TELECOM = 13,
+  JOBS_AND_EDUCATION = 958,
+  LAW_AND_GOVERNMENT = 19,
+  NEWS = 16,
+  ONLINE_COMMUNITIES = 299,
+  PEOPLE_AND_SOCIETY = 14,
+  PETS_AND_ANIMALS = 66,
+  REAL_ESTATE = 29,
+  REFERENCE = 533,
+  SCIENCE = 174,
+  SHOPPING = 18,
+  SPORTS = 20,
+  TRAVEL = 67,
 }
 
 // Subcategories for Beauty and Fitness
@@ -209,29 +221,19 @@ export type GoogleTrendsCustomTimeRange = `${string} ${string}`; // Format: 'YYY
 
 // Interface for Google Trends query parameters
 export interface GoogleTrendsQueryParams {
-  timeRange: GoogleTrendsTimeRange | GoogleTrendsCustomTimeRange;
+  searchTerm: string;
+  timeRange: GoogleTrendsTimeRange;
   geo: GoogleTrendsGeo;
   searchType: GoogleTrendsSearchType;
   category: GoogleTrendsMainCategory;
-  subcategory?: 
-    GoogleTrendsBeautyFitnessSubcategory | 
-    GoogleTrendsBooksLiteratureSubcategory |
-    GoogleTrendsBusinessIndustrialSubcategory |
-    GoogleTrendsComputersElectronicsSubcategory |
-    GoogleTrendsFinanceSubcategory |
-    GoogleTrendsFoodDrinkSubcategory |
-    GoogleTrendsGamesSubcategory |
-    GoogleTrendsHealthSubcategory |
-    GoogleTrendsHobbiesLeisureSubcategory |
-    GoogleTrendsHomeGardenSubcategory |
-    GoogleTrendsInternetTelecomSubcategory;
 }
 
 // Example usage
 const exampleQuery: GoogleTrendsQueryParams = {
+  searchTerm: "example",  // Add this line
   timeRange: GoogleTrendsTimeRange.PAST_7_DAYS,
   geo: GoogleTrendsGeo.UNITED_STATES,
   searchType: GoogleTrendsSearchType.WEB_SEARCH,
   category: GoogleTrendsMainCategory.COMPUTERS_AND_ELECTRONICS,
-  subcategory: GoogleTrendsComputersElectronicsSubcategory.PROGRAMMING,
+  // Remove the subcategory line
 };
