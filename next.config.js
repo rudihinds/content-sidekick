@@ -25,6 +25,9 @@ const nextConfig = {
     NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY,
     APIFY_API_TOKEN: process.env.APIFY_API_TOKEN,
   },
+  experimental: {
+    serverComponentsExternalPackages: ['@vercel/kv'],
+  },
 };
 
 // do not use module.exports here ever, it doesnt work 

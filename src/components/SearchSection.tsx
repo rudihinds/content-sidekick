@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import { useForm, SubmitHandler } from 'react-hook-form';
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -10,10 +10,10 @@ import {
   GoogleTrendsTimeRange,
   GoogleTrendsGeo,
   GoogleTrendsSearchType,
-  GoogleTrendsMainCategory,
   GoogleTrendsQueryParams
 } from '@/types/googleTrends';
-import { TrendsVisualization } from './TrendsVisualization'; // Add this import
+import { TrendsVisualization } from './TrendsVisualization';
+import { GoogleTrendsCategory } from '@/types/googleTrends';
 
 interface SearchSectionProps {
   searchTerm: string;
@@ -22,19 +22,17 @@ interface SearchSectionProps {
 }
 
 const timeRangeOptions = {
-  "Past 30 Days": GoogleTrendsTimeRange.PAST_30_DAYS,
   "Past Hour": GoogleTrendsTimeRange.PAST_HOUR,
   "Past 4 Hours": GoogleTrendsTimeRange.PAST_4_HOURS,
   "Past Day": GoogleTrendsTimeRange.PAST_DAY,
   "Past 7 Days": GoogleTrendsTimeRange.PAST_7_DAYS,
+  "Past 30 Days": GoogleTrendsTimeRange.PAST_30_DAYS,
   "Past 90 Days": GoogleTrendsTimeRange.PAST_90_DAYS,
   "Past 12 Months": GoogleTrendsTimeRange.PAST_12_MONTHS,
-  "Past 5 Years": GoogleTrendsTimeRange.PAST_5_YEARS,
-  "Since 2004": GoogleTrendsTimeRange.SINCE_2004,
 };
 
 const geoOptions = {
-  "Global": "GLOBAL",
+  "Global": GoogleTrendsGeo.GLOBAL,
   "United States": GoogleTrendsGeo.UNITED_STATES,
   "United Kingdom": GoogleTrendsGeo.UNITED_KINGDOM,
   "Canada": GoogleTrendsGeo.CANADA,
@@ -47,53 +45,61 @@ const geoOptions = {
 };
 
 const searchTypeOptions = {
+  "Web Search": GoogleTrendsSearchType.WEB_SEARCH,
   "YouTube Search": GoogleTrendsSearchType.YOUTUBE_SEARCH,
-  "Web Search": "WEB_SEARCH",
-  "Image Search": GoogleTrendsSearchType.IMAGE_SEARCH,
-  "News Search": GoogleTrendsSearchType.NEWS_SEARCH,
-  "Shopping Search": GoogleTrendsSearchType.SHOPPING_SEARCH,
 };
 
 const categoryOptions = {
-  "All Categories": GoogleTrendsMainCategory.ALL_CATEGORIES,
-  "Arts & Entertainment": GoogleTrendsMainCategory.ARTS_AND_ENTERTAINMENT,
-  "Autos & Vehicles": GoogleTrendsMainCategory.AUTOS_AND_VEHICLES,
-  "Beauty & Fitness": GoogleTrendsMainCategory.BEAUTY_AND_FITNESS,
-  "Books & Literature": GoogleTrendsMainCategory.BOOKS_AND_LITERATURE,
-  "Business & Industrial": GoogleTrendsMainCategory.BUSINESS_AND_INDUSTRIAL,
-  "Computers & Electronics": GoogleTrendsMainCategory.COMPUTERS_AND_ELECTRONICS,
-  "Finance": GoogleTrendsMainCategory.FINANCE,
-  "Food & Drink": GoogleTrendsMainCategory.FOOD_AND_DRINK,
-  "Games": GoogleTrendsMainCategory.GAMES,
-  "Health": GoogleTrendsMainCategory.HEALTH,
-  "Hobbies & Leisure": GoogleTrendsMainCategory.HOBBIES_AND_LEISURE,
-  "Home & Garden": GoogleTrendsMainCategory.HOME_AND_GARDEN,
-  "Internet & Telecom": GoogleTrendsMainCategory.INTERNET_AND_TELECOM,
-  "Jobs & Education": GoogleTrendsMainCategory.JOBS_AND_EDUCATION,
-  "Law & Government": GoogleTrendsMainCategory.LAW_AND_GOVERNMENT,
-  "News": GoogleTrendsMainCategory.NEWS,
-  "Online Communities": GoogleTrendsMainCategory.ONLINE_COMMUNITIES,
-  "People & Society": GoogleTrendsMainCategory.PEOPLE_AND_SOCIETY,
-  "Pets & Animals": GoogleTrendsMainCategory.PETS_AND_ANIMALS,
-  "Real Estate": GoogleTrendsMainCategory.REAL_ESTATE,
-  "Reference": GoogleTrendsMainCategory.REFERENCE,
-  "Science": GoogleTrendsMainCategory.SCIENCE,
-  "Shopping": GoogleTrendsMainCategory.SHOPPING,
-  "Sports": GoogleTrendsMainCategory.SPORTS,
-  "Travel": GoogleTrendsMainCategory.TRAVEL,
+  "All Categories": GoogleTrendsCategory.ALL, // Change this line
+  "Arts & Entertainment": GoogleTrendsCategory.ARTS_ENTERTAINMENT,
+  "Autos & Vehicles": GoogleTrendsCategory.AUTOS_VEHICLES,
+  // ... add other categories as needed
 };
 
 interface FormInputs {
   searchTerm: string;
 }
 
+const fetchTrendsData = async (searchParams: GoogleTrendsQueryParams) => {
+  console.log('Sending request to /api/googleTrends with params:', searchParams);
+  const response = await fetch('/api/googleTrends', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(searchParams),
+  });
+  console.log('Response status:', response.status);
+  if (!response.ok) {
+    const errorText = await response.text();
+    console.error('Error response:', errorText);
+    throw new Error(`Network response was not ok: ${errorText}`);
+  }
+  const data = await response.json();
+  console.log('Received data:', data);
+  return data;
+};
+
 export function SearchSection({ searchTerm, setSearchTerm, handleNewSearch }: SearchSectionProps) {
   const [timeRange, setTimeRange] = useState<GoogleTrendsTimeRange>(GoogleTrendsTimeRange.PAST_30_DAYS);
   const [geo, setGeo] = useState<GoogleTrendsGeo>(GoogleTrendsGeo.GLOBAL);
-  const [searchType, setSearchType] = useState<GoogleTrendsSearchType>(GoogleTrendsSearchType.YOUTUBE_SEARCH);
-  const [category, setCategory] = useState<GoogleTrendsMainCategory>(GoogleTrendsMainCategory.ALL_CATEGORIES);
-  const [trendsData, setTrendsData] = useState<any>(null); // Add this state
-  const [isLoading, setIsLoading] = useState<boolean>(false); // Add this state
+  const [searchType, setSearchType] = useState<GoogleTrendsSearchType>(GoogleTrendsSearchType.WEB_SEARCH);
+  const [searchParams, setSearchParams] = useState<GoogleTrendsQueryParams>({
+    searchTerms: [searchTerm],
+    isMultiple: false,
+    timeRange: GoogleTrendsTimeRange.PAST_30_DAYS,
+    geo: GoogleTrendsGeo.GLOBAL,
+    category: GoogleTrendsCategory.ALL,
+    skipDebugScreen: false,
+    isPublic: false,
+    maxItems: 0,
+    maxConcurrency: 10,
+    maxRequestRetries: 7,
+    pageLoadTimeoutSecs: 180,
+    searchType: GoogleTrendsSearchType.WEB_SEARCH,
+  });
+  const [isSearching, setIsSearching] = useState(false);
+  const [data, setData] = useState<any>(null);
+  const [error, setError] = useState<Error | null>(null);
+  const [category, setCategory] = useState<GoogleTrendsCategory>(GoogleTrendsCategory.ALL); // Change this line
 
   const { register, handleSubmit } = useForm<FormInputs>({
     defaultValues: {
@@ -101,41 +107,35 @@ export function SearchSection({ searchTerm, setSearchTerm, handleNewSearch }: Se
     }
   });
 
-  const onSubmit: SubmitHandler<FormInputs> = async (data) => {
-    console.log("Search term:", data.searchTerm);
-    setSearchTerm(data.searchTerm);
-    setIsLoading(true); // Set loading to true when starting the request
-    const params: GoogleTrendsQueryParams = {
-      searchTerm: data.searchTerm,
+  const onSubmit: SubmitHandler<FormInputs> = useCallback(async (formData) => {
+    setIsSearching(true);
+    setError(null);
+    const newParams: GoogleTrendsQueryParams = {
+      searchTerms: [formData.searchTerm],
       timeRange,
-      geo: geo === GoogleTrendsGeo.GLOBAL ? GoogleTrendsGeo.GLOBAL : geo,
-      searchType: searchType === GoogleTrendsSearchType.WEB_SEARCH ? GoogleTrendsSearchType.WEB_SEARCH : searchType,
-      category
+      geo: geo === GoogleTrendsGeo.GLOBAL ? "" : geo,
+      category: category === GoogleTrendsCategory.ALL ? "" : category,
+      searchType,
     };
-
+    console.log('Submitting search with params:', newParams);
+    setSearchParams(newParams);
+    setSearchTerm(formData.searchTerm);
+    handleNewSearch(newParams);
     try {
-      const response = await fetch('/api/googleTrends', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(params),
-      });
-
-      if (!response.ok) {
-        throw new Error('Network response was not ok');
-      }
-
-      const result = await response.json();
-      console.log('API response:', result);
-      setTrendsData(result.data); // Set the trends data
-      handleNewSearch(params);
+      const result = await fetchTrendsData(newParams);
+      console.log('Search result:', result);
+      setData(result);
     } catch (error) {
-      console.error('Error calling API:', error);
+      console.error('Error fetching data:', error);
+      setError(error instanceof Error ? error : new Error('An unknown error occurred'));
     } finally {
-      setIsLoading(false); // Set loading to false when the request is complete
+      setIsSearching(false);
     }
-  };
+  }, [timeRange, geo, category, searchType, setSearchTerm, handleNewSearch]);
+
+  const handleSidebarChange = useCallback((newParams: Partial<GoogleTrendsQueryParams>) => {
+    setSearchParams(prev => ({ ...prev, ...newParams }));
+  }, []);
 
   return (
     <>
@@ -151,7 +151,7 @@ export function SearchSection({ searchTerm, setSearchTerm, handleNewSearch }: Se
                 className="flex-grow"
               />
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-4 gap-4">
               <Select value={timeRange} onValueChange={(value: GoogleTrendsTimeRange) => setTimeRange(value)}>
                 <SelectTrigger>
                   <SelectValue placeholder="Select Time Range" />
@@ -164,7 +164,7 @@ export function SearchSection({ searchTerm, setSearchTerm, handleNewSearch }: Se
                   ))}
                 </SelectContent>
               </Select>
-              <Select value={geo === GoogleTrendsGeo.GLOBAL ? "GLOBAL" : geo} onValueChange={(value: string) => setGeo(value as GoogleTrendsGeo)}>
+              <Select value={geo} onValueChange={(value: GoogleTrendsGeo) => setGeo(value)}>
                 <SelectTrigger>
                   <SelectValue placeholder="Select Region" />
                 </SelectTrigger>
@@ -176,7 +176,7 @@ export function SearchSection({ searchTerm, setSearchTerm, handleNewSearch }: Se
                   ))}
                 </SelectContent>
               </Select>
-              <Select value={searchType === GoogleTrendsSearchType.WEB_SEARCH ? "WEB_SEARCH" : searchType} onValueChange={(value: string) => setSearchType(value as GoogleTrendsSearchType)}>
+              <Select value={searchType} onValueChange={(value: GoogleTrendsSearchType) => setSearchType(value)}>
                 <SelectTrigger>
                   <SelectValue placeholder="Select Search Type" />
                 </SelectTrigger>
@@ -188,26 +188,42 @@ export function SearchSection({ searchTerm, setSearchTerm, handleNewSearch }: Se
                   ))}
                 </SelectContent>
               </Select>
-              <Select value={category.toString()} onValueChange={(value: string) => setCategory(parseInt(value) as GoogleTrendsMainCategory)}>
+              <Select value={category} onValueChange={(value: GoogleTrendsCategory) => setCategory(value)}>
                 <SelectTrigger>
                   <SelectValue placeholder="Select Category" />
                 </SelectTrigger>
                 <SelectContent>
                   {Object.entries(categoryOptions).map(([label, value]) => (
-                    <SelectItem key={value} value={value.toString()}>
+                    <SelectItem key={value} value={value}>
                       {label}
                     </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
             </div>
-            <Button type="submit" className="w-full" disabled={isLoading}>
-              {isLoading ? 'Searching...' : 'Search Data'}
+            <Button type="submit" className="w-full" disabled={isSearching}>
+              {isSearching ? 'Searching...' : 'Search Data'}
             </Button>
           </form>
         </CardContent>
       </Card>
-      {trendsData && <TrendsVisualization data={trendsData} />}
+      {error && <p className="text-red-500 mt-4">Error: {error.message}</p>}
+      {data && (
+        <div className="mt-8">
+          <h3 className="text-xl font-bold mb-4">Search Results</h3>
+          <p className="mb-2">
+            Data {data.isCached ? 'loaded from cache' : 'freshly fetched'} at: {data.timestamp}
+          </p>
+          <div className="bg-gray-100 p-4 rounded-md">
+            <pre className="whitespace-pre-wrap">{JSON.stringify(data, null, 2)}</pre>
+          </div>
+          <TrendsVisualization 
+            data={data} 
+            onParamChange={handleSidebarChange}
+            currentParams={searchParams}
+          />
+        </div>
+      )}
     </>
   );
 }

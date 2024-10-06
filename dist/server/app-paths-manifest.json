@@ -1,3 +1,4 @@
 {
-  "/api/googleTrends/route": "app/api/googleTrends/route.js"
+  "/api/googleTrends/route": "app/api/googleTrends/route.js",
+  "/page": "app/page.js"
 }

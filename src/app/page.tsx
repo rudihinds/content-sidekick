@@ -12,6 +12,7 @@ import { Sidebar } from "@/components/Sidebar";
 import { faker } from '@faker-js/faker';
 import { auth } from '@clerk/nextjs';
 import { redirect } from 'next/navigation';
+import { GoogleTrendsQueryParams } from '@/types/googleTrends';
 
 const timeRanges = [
   "Past hour",
@@ -201,11 +202,10 @@ export default function Dashboard() {
     }
   };
 
-  const handleNewSearch = () => {
-    if (searchTerm.trim()) {
-      // Fetch new data here
-      console.log("Searching for:", searchTerm);
-    }
+  const handleNewSearch = (params: GoogleTrendsQueryParams) => {
+    // Handle the new search parameters
+    console.log('New search params:', params);
+    // You might want to update some global state or trigger a new data fetch here
   };
 
   const handleGetContentIdeas = (term: string) => {
