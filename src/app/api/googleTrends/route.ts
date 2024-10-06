@@ -2,8 +2,10 @@ import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 import { GoogleTrendsQueryParams, convertGeoForApify } from '@/types/googleTrends';
 import { ApifyClient } from 'apify-client';
+import { kv } from '@vercel/kv';
 
 const APIFY_API_TOKEN = process.env.APIFY_API_TOKEN;
+const CACHE_TTL = 3600; // Cache for 1 hour (in seconds)
 
 async function fetchGoogleTrendsData(params: GoogleTrendsQueryParams) {
   console.log('Fetching fresh data from Apify API with params:', params);
@@ -48,15 +50,31 @@ export async function POST(request: NextRequest) {
 
   try {
     const body = await request.json();
-    console.log('Fetching fresh data from Apify.');
-    const trendsData = await fetchGoogleTrendsData(body as GoogleTrendsQueryParams);
-    console.log('Fresh data fetched:', trendsData);
+    const params = body as GoogleTrendsQueryParams;
+    
+    // Create a cache key based on the search parameters
+    const cacheKey = `trends:${JSON.stringify(params)}`;
+
+    // Try to get data from cache
+    let trendsData = await kv.get(cacheKey);
+    let isCached = false;
+
+    if (!trendsData) {
+      console.log('Cache miss. Fetching fresh data from Apify.');
+      trendsData = await fetchGoogleTrendsData(params);
+      
+      // Store the result in cache
+      await kv.set(cacheKey, trendsData, { ex: CACHE_TTL });
+    } else {
+      console.log('Cache hit. Using cached data.');
+      isCached = true;
+    }
 
     // Add a timestamp to the data
     const responseData = {
       data: trendsData,
       timestamp: new Date().toISOString(),
-      isCached: false
+      isCached: isCached
     };
 
     console.log('Returning data:', responseData);
