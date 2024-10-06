@@ -9,11 +9,10 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import {
   GoogleTrendsTimeRange,
   GoogleTrendsGeo,
-  GoogleTrendsSearchType,
-  GoogleTrendsQueryParams
+  GoogleTrendsQueryParams,
+  convertGeoForApify
 } from '@/types/googleTrends';
 import { TrendsVisualization } from './TrendsVisualization';
-import { GoogleTrendsCategory } from '@/types/googleTrends';
 
 interface SearchSectionProps {
   searchTerm: string;
@@ -44,18 +43,6 @@ const geoOptions = {
   "Japan": GoogleTrendsGeo.JAPAN,
 };
 
-const searchTypeOptions = {
-  "Web Search": GoogleTrendsSearchType.WEB_SEARCH,
-  "YouTube Search": GoogleTrendsSearchType.YOUTUBE_SEARCH,
-};
-
-const categoryOptions = {
-  "All Categories": GoogleTrendsCategory.ALL, // Change this line
-  "Arts & Entertainment": GoogleTrendsCategory.ARTS_ENTERTAINMENT,
-  "Autos & Vehicles": GoogleTrendsCategory.AUTOS_VEHICLES,
-  // ... add other categories as needed
-};
-
 interface FormInputs {
   searchTerm: string;
 }
@@ -81,25 +68,14 @@ const fetchTrendsData = async (searchParams: GoogleTrendsQueryParams) => {
 export function SearchSection({ searchTerm, setSearchTerm, handleNewSearch }: SearchSectionProps) {
   const [timeRange, setTimeRange] = useState<GoogleTrendsTimeRange>(GoogleTrendsTimeRange.PAST_30_DAYS);
   const [geo, setGeo] = useState<GoogleTrendsGeo>(GoogleTrendsGeo.GLOBAL);
-  const [searchType, setSearchType] = useState<GoogleTrendsSearchType>(GoogleTrendsSearchType.WEB_SEARCH);
   const [searchParams, setSearchParams] = useState<GoogleTrendsQueryParams>({
     searchTerms: [searchTerm],
-    isMultiple: false,
     timeRange: GoogleTrendsTimeRange.PAST_30_DAYS,
     geo: GoogleTrendsGeo.GLOBAL,
-    category: GoogleTrendsCategory.ALL,
-    skipDebugScreen: false,
-    isPublic: false,
-    maxItems: 0,
-    maxConcurrency: 10,
-    maxRequestRetries: 7,
-    pageLoadTimeoutSecs: 180,
-    searchType: GoogleTrendsSearchType.WEB_SEARCH,
   });
   const [isSearching, setIsSearching] = useState(false);
   const [data, setData] = useState<any>(null);
   const [error, setError] = useState<Error | null>(null);
-  const [category, setCategory] = useState<GoogleTrendsCategory>(GoogleTrendsCategory.ALL); // Change this line
 
   const { register, handleSubmit } = useForm<FormInputs>({
     defaultValues: {
@@ -113,16 +89,17 @@ export function SearchSection({ searchTerm, setSearchTerm, handleNewSearch }: Se
     const newParams: GoogleTrendsQueryParams = {
       searchTerms: [formData.searchTerm],
       timeRange,
-      geo: geo === GoogleTrendsGeo.GLOBAL ? "" : geo,
-      category: category === GoogleTrendsCategory.ALL ? "" : category,
-      searchType,
+      geo,
     };
     console.log('Submitting search with params:', newParams);
     setSearchParams(newParams);
     setSearchTerm(formData.searchTerm);
     handleNewSearch(newParams);
     try {
-      const result = await fetchTrendsData(newParams);
+      const result = await fetchTrendsData({
+        ...newParams,
+        geo: convertGeoForApify(newParams.geo),
+      });
       console.log('Search result:', result);
       setData(result);
     } catch (error) {
@@ -131,7 +108,7 @@ export function SearchSection({ searchTerm, setSearchTerm, handleNewSearch }: Se
     } finally {
       setIsSearching(false);
     }
-  }, [timeRange, geo, category, searchType, setSearchTerm, handleNewSearch]);
+  }, [timeRange, geo, setSearchTerm, handleNewSearch]);
 
   const handleSidebarChange = useCallback((newParams: Partial<GoogleTrendsQueryParams>) => {
     setSearchParams(prev => ({ ...prev, ...newParams }));
@@ -151,7 +128,7 @@ export function SearchSection({ searchTerm, setSearchTerm, handleNewSearch }: Se
                 className="flex-grow"
               />
             </div>
-            <div className="grid grid-cols-4 gap-4">
+            <div className="grid grid-cols-2 gap-4">
               <Select value={timeRange} onValueChange={(value: GoogleTrendsTimeRange) => setTimeRange(value)}>
                 <SelectTrigger>
                   <SelectValue placeholder="Select Time Range" />
@@ -170,30 +147,6 @@ export function SearchSection({ searchTerm, setSearchTerm, handleNewSearch }: Se
                 </SelectTrigger>
                 <SelectContent>
                   {Object.entries(geoOptions).map(([label, value]) => (
-                    <SelectItem key={value} value={value}>
-                      {label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              <Select value={searchType} onValueChange={(value: GoogleTrendsSearchType) => setSearchType(value)}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Select Search Type" />
-                </SelectTrigger>
-                <SelectContent>
-                  {Object.entries(searchTypeOptions).map(([label, value]) => (
-                    <SelectItem key={value} value={value}>
-                      {label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              <Select value={category} onValueChange={(value: GoogleTrendsCategory) => setCategory(value)}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Select Category" />
-                </SelectTrigger>
-                <SelectContent>
-                  {Object.entries(categoryOptions).map(([label, value]) => (
                     <SelectItem key={value} value={value}>
                       {label}
                     </SelectItem>

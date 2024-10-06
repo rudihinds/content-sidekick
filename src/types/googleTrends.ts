@@ -7,12 +7,13 @@ export enum GoogleTrendsTimeRange {
   PAST_30_DAYS = "today 1-m",
   PAST_90_DAYS = "today 3-m",
   PAST_12_MONTHS = "today 12-m",
-  ALL_TIME = "" // Added to match the sample JSON
+  PAST_5_YEARS = "today 5-y",
+  ALL_TIME = "all"
 }
 
 // Geographical regions for Google Trends queries
 export enum GoogleTrendsGeo {
-  GLOBAL = "GLOBAL", // Change this from "" to "GLOBAL"
+  GLOBAL = "GLOBAL",
   UNITED_STATES = "US",
   UNITED_KINGDOM = "GB",
   CANADA = "CA",
@@ -39,6 +40,11 @@ export enum GoogleTrendsCategory {
 
 export interface GoogleTrendsQueryParams {
   searchTerms: string[];
-  timeRange: string;
-  viewedFrom: string;
+  timeRange: GoogleTrendsTimeRange;
+  geo: GoogleTrendsGeo;
+}
+
+// Utility function to convert GoogleTrendsGeo to Apify actor input format
+export function convertGeoForApify(geo: GoogleTrendsGeo): string {
+  return geo === GoogleTrendsGeo.GLOBAL ? "" : geo;
 }

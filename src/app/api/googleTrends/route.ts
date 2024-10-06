@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
-import { GoogleTrendsQueryParams } from '@/types/googleTrends';
+import { GoogleTrendsQueryParams, convertGeoForApify } from '@/types/googleTrends';
 import { ApifyClient } from 'apify-client';
 
 const APIFY_API_TOKEN = process.env.APIFY_API_TOKEN;
@@ -19,9 +19,9 @@ async function fetchGoogleTrendsData(params: GoogleTrendsQueryParams) {
 
   // Prepare Actor input
   const input = {
-    searchTerms: ["London"],
-    timeRange: "",
-    viewedFrom: "",
+    searchTerms: params.searchTerms,
+    timeRange: params.timeRange,
+    geo: convertGeoForApify(params.geo),
   };
 
   console.log('Exact Apify input:', JSON.stringify(input, null, 2));
@@ -47,8 +47,9 @@ export async function POST(request: NextRequest) {
   console.log('Starting POST request');
 
   try {
+    const body = await request.json();
     console.log('Fetching fresh data from Apify.');
-    const trendsData = await fetchGoogleTrendsData({} as GoogleTrendsQueryParams); // Pass empty object, it won't be used
+    const trendsData = await fetchGoogleTrendsData(body as GoogleTrendsQueryParams);
     console.log('Fresh data fetched:', trendsData);
 
     // Add a timestamp to the data
